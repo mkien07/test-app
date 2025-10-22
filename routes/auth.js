@@ -61,11 +61,7 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-    res.cookie("token", token, {
-    httpOnly: true,
-    secure: true, // nếu dùng HTTPS
-    sameSite: "None"
-});
+    
 
 // Đăng xuất
 router.post("/logout", async (req, res) => {
