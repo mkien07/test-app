@@ -41,11 +41,7 @@ app.get("/", (req, res) => {
 app.get("/menu", (req, res) => {
   res.sendFile(path.join(publicPath, "menu.html"));
 });
-res.cookie("token", token, {
-  httpOnly: true,
-  secure: true, // nếu dùng HTTPS
-  sameSite: "None"
-});
+
 
 // 🔥 Render sẽ tự set biến PORT, không nên cố định 3000
 const PORT = process.env.PORT || 3000;
