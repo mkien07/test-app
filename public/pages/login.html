@@ -29,7 +29,7 @@
     <!-- liên kết phụ -->
     <div class="extra-links">
       <a href="#">Quên mật khẩu?</a> |
-      <a href="register.html">Đăng ký</a>
+      <a href="register">Đăng ký</a>
     </div>
   </form>
 
@@ -46,7 +46,7 @@
   // Khi người dùng đã đăng nhập => chuyển thẳng đến menu
   const existingUser = localStorage.getItem("user");
   if (existingUser) {
-    loadPage("menu.html");
+    loadPage("menu");
   }
 
   // Xử lý form đăng nhập
@@ -75,7 +75,7 @@
         // Lưu user vào localStorage
         localStorage.setItem("user", JSON.stringify(result.user));
         // Chuyển sang menu.html
-        loadPage("menu.html");
+        loadPage("menu");
       } else {
         document.getElementById("message").textContent = result.message || "Đăng nhập thất bại.";
       }
