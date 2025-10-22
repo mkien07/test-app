@@ -7,30 +7,36 @@ const User = require("../models/User");
 // Đăng ký
 router.post("/register", async (req, res) => {
   try {
-    const { username, password, email } = req.body;
+    const { username, password, email, phone } = req.body;
     const ip = req.ip;
 
+    if (!username || !password || !email) {
+      return res.status(400).json({ message: "Thiếu thông tin đăng ký" });
+    }
+
     const existing = await User.findOne({ username });
-    if (existing) return res.status(400).json({ message: "Tên người dùng đã tồn tại" });
+    if (existing) {
+      return res.status(400).json({ message: "Tên người dùng đã tồn tại" });
+    }
 
     const hash = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    const user = new User({
       username,
       password: hash,
       email,
+      phone,
       registerIP: ip,
       lastLoginIP: ip,
     });
 
-    res.json({ message: "Đăng ký thành công", user });
+    await user.save();
+
+    res.status(201).json({ message: "Đăng ký thành công", user });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Lỗi đăng ký:", err);
+    res.status(500).json({ error: "Lỗi máy chủ khi đăng ký" });
   }
-  console.log(req.body)
-  console.log(user)
-
-
 });
 
 // Đăng nhập
@@ -39,15 +45,27 @@ router.post("/login", async (req, res) => {
     const { username, password } = req.body;
     const ip = req.ip;
 
+    if (!username || !password) {
+      return res.status(400).json({ message: "Thiếu thông tin đăng nhập" });
+    }
+
     const user = await User.findOne({ username });
-    if (!user) return res.status(400).json({ message: "Sai tên đăng nhập" });
-    if (user.isLocked) return res.status(403).json({ message: "Tài khoản đã bị khóa" });
+    if (!user) {
+      return res.status(400).json({ message: "Sai tên đăng nhập" });
+    }
+
+    if (user.isLocked) {
+      return res.status(403).json({ message: "Tài khoản đã bị khóa" });
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ message: "Sai mật khẩu" });
+    if (!match) {
+      return res.status(400).json({ message: "Sai mật khẩu" });
+    }
 
-    // Nếu user đã có session đang hoạt động => chặn
-    if (user.activeSession) return res.status(403).json({ message: "Tài khoản đã đăng nhập ở nơi khác" });
+    if (user.activeSession) {
+      return res.status(403).json({ message: "Tài khoản đã đăng nhập ở nơi khác" });
+    }
 
     const token = jwt.sign({ id: user._id }, "secretKey", { expiresIn: "1h" });
 
@@ -55,22 +73,32 @@ router.post("/login", async (req, res) => {
     user.lastLoginIP = ip;
     await user.save();
 
-    res.cookie("token", token, { httpOnly: true });
-    res.json({ message: "Đăng nhập thành công", token });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+
+    res.status(200).json({ message: "Đăng nhập thành công", token, user });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Lỗi đăng nhập:", err);
+    res.status(500).json({ error: "Lỗi máy chủ khi đăng nhập" });
   }
 });
-    
 
 // Đăng xuất
 router.post("/logout", async (req, res) => {
   try {
     const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ message: "Thiếu tên người dùng để đăng xuất" });
+    }
+
     await User.updateOne({ username }, { $unset: { activeSession: "" } });
     res.json({ message: "Đã đăng xuất" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Lỗi đăng xuất:", err);
+    res.status(500).json({ error: "Lỗi máy chủ khi đăng xuất" });
   }
 });
 
