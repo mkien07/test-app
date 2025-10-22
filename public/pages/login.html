@@ -1,0 +1,87 @@
+<!-- Bộ chọn ngôn ngữ -->
+<div class="language-selector">
+  <select id="language">
+    <option value="vi">🇻🇳 Tiếng Việt</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="jp">🇯🇵 日本語</option>
+  </select>
+</div>
+
+<!-- Background -->
+<div class="background"></div>
+
+<!-- Form đăng nhập -->
+<div class="login-box" id="loginBox">
+  <h2>Đăng nhập</h2>
+  <form id="loginForm">
+    <div class="input-group">
+      <input type="text" id="username" placeholder="Tên đăng nhập hoặc email" required />
+    </div>
+
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Mật khẩu" required />
+      <span class="toggle-password" onclick="togglePassword()"></span>
+    </div>
+
+    <button type="submit">Đăng nhập</button>
+
+    <!-- liên kết phụ -->
+    <div class="extra-links">
+      <a href="#">Quên mật khẩu?</a> |
+      <a href="register.html">Đăng ký</a>
+    </div>
+  </form>
+
+  <p id="message" style="margin-top: 10px; color: red;"></p>
+</div>
+
+<script>
+  // Hiển thị/ẩn mật khẩu
+  function togglePassword() {
+    const pwdInput = document.getElementById("password");
+    pwdInput.type = pwdInput.type === "password" ? "text" : "password";
+  }
+
+  // Khi người dùng đã đăng nhập => chuyển thẳng đến menu
+  const existingUser = localStorage.getItem("user");
+  if (existingUser) {
+    loadPage("menu.html");
+  }
+
+  // Xử lý form đăng nhập
+  document.getElementById("loginForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!username || !password) {
+      document.getElementById("message").textContent = "Vui lòng nhập đầy đủ thông tin.";
+      return;
+    }
+
+    try {
+      const response = await fetch("http://test-app.onrender.com/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Lưu user vào localStorage
+        localStorage.setItem("user", JSON.stringify(result.user));
+        // Chuyển sang menu.html
+        loadPage("menu.html");
+      } else {
+        document.getElementById("message").textContent = result.message || "Đăng nhập thất bại.";
+      }
+    } catch (error) {
+      console.error(error);
+      document.getElementById("message").textContent = "Lỗi kết nối máy chủ!";
+    }
+  });
+</script>
+

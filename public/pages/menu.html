@@ -1,0 +1,28 @@
+<div class="menu-container">
+  <h2>Xin chào, <span id="username"></span> 👋</h2>
+  <p>Bạn đã đăng nhập thành công!</p>
+
+  <div class="menu-actions">
+    <button id="btnLogout">Đăng xuất</button>
+    <button id="btnProfile">Thông tin tài khoản</button>
+  </div>
+</div>
+
+<script>
+  // Lấy username từ localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user) {
+    document.getElementById("username").textContent = user.username;
+  }
+
+  // Nút đăng xuất
+  document.getElementById("btnLogout").addEventListener("click", () => {
+    localStorage.removeItem("user");
+    loadPage("login.html");
+  });
+
+  // Xem thông tin tài khoản
+  document.getElementById("btnProfile").addEventListener("click", () => {
+    alert(`👤 Username: ${user.username}\n📧 Email: ${user.email}\n💰 Số dư: ${user.balance || 0} VNĐ`);
+  });
+</script>
