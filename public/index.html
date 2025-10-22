@@ -8,8 +8,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="app">Đang tải...</div>
+  <div id="app">Đang kiểm tra phiên đăng nhập...</div>
 
-  <script src="js/main.js"></script>
+  <script>
+    // Kiểm tra nếu đã đăng nhập → chuyển sang menu
+    try {
+      const user = localStorage.getItem("user");
+      if (user) {
+        window.location.href = "/menu";
+      } else {
+        window.location.href = "/register";
+      }
+    } catch (err) {
+      console.error("Lỗi kiểm tra phiên:", err);
+      document.getElementById("app").textContent = "Lỗi khi kiểm tra phiên đăng nhập.";
+    }
+  </script>
 </body>
 </html>

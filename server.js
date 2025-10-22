@@ -10,7 +10,7 @@ const app = express();
 // 🔗 Kết nối MongoDB Atlas
 connectDB();
 
-// ✅ Cấu hình CORS cho domain frontend
+// ✅ Cấu hình CORS cho frontend
 app.use(
   cors({
     origin: ["http://localhost:5500", "https://test-app-f96w.onrender.com"],
@@ -19,31 +19,44 @@ app.use(
 );
 
 app.use(express.json());
-app.use(cookieParser());
-app.set('trust proxy', true);
-
-// ✅ API Routes
-
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/user", require("./routes/user"));
+app.use(cookieParser());
+app.set("trust proxy", true);
 
-// ✅ Serve static files (frontend)
+// ✅ Đường dẫn thư mục public
 const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
 
-// ✅ Khi user vào "/" hoặc bất kỳ đường dẫn frontend nào → trả về index.html
+// ✅ Middleware kiểm tra nếu đã đăng nhập → chặn truy cập login/register
+function checkNotLoggedIn(req, res, next) {
+  const token = req.cookies.token;
+  if (token) {
+    return res.redirect("/menu");
+  }
+  next();
+}
+
+// ✅ API Routes
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/user", require("./routes/user"));
+
+// ✅ Route frontend
 app.get("/", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
 
-// (Tùy chọn) Nếu bạn có route riêng cho menu.html
-app.get("/menu", (req, res) => {
-  res.sendFile(path.join(publicPath, "menu.html"));
+app.get("/login", checkNotLoggedIn, (req, res) => {
+  res.sendFile(path.join(publicPath, "pages/login.html"));
 });
 
+app.get("/register", checkNotLoggedIn, (req, res) => {
+  res.sendFile(path.join(publicPath, "pages/register.html"));
+});
 
-// 🔥 Render sẽ tự set biến PORT, không nên cố định 3000
+app.get("/menu", (req, res) => {
+  res.sendFile(path.join(publicPath, "pages/menu.html"));
+});
+
+// 🔥 Render sẽ tự set biến PORT
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server đang chạy tại cổng ${PORT}`));
