@@ -22,6 +22,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ✅ API Routes
+app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/user", require("./routes/user"));
 
