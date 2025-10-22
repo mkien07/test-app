@@ -1,159 +1,124 @@
 <!-- pages/register.html -->
-<link rel="stylesheet" href="/css/style.css">
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng ký</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="language-selector">
+    <select id="language">
+      <option value="vi">🇻🇳 Tiếng Việt</option>
+    </select>
+  </div>
 
-<div class="language-selector">
-  <select id="language">
-    <option value="vi">🇻🇳 Tiếng Việt</option>
-  </select>
-</div>
+  <div class="background"></div>
 
-<div class="background"></div>
+  <div class="login-box">
+    <h2>Đăng ký tài khoản ✨</h2>
 
-<div class="login-box">
-  <h2>Đăng ký tài khoản ✨</h2>
+    <form id="registerForm" autocomplete="off">
+      <div class="input-group">
+        <input type="text" id="newUsername" name="username" placeholder="Tên đăng nhập" required />
+      </div>
 
-  <form id="registerForm" autocomplete="off">
-    <div class="input-group">
-      <input type="text" id="newUsername" name="username" placeholder="Tên đăng nhập" required />
-    </div>
+      <div class="input-group">
+        <input type="email" id="email" name="email" placeholder="Email (@gmail.com)" required />
+      </div>
 
-    <div class="input-group">
-      <input type="email" id="email" name="email" placeholder="Email (@gmail.com)" required />
-    </div>
+      <div class="input-group">
+        <input type="text" id="phone" name="phone" placeholder="Số điện thoại (10 số)" required pattern="0[0-9]{9}" />
+      </div>
 
-    <div class="input-group">
-      <input type="text" id="phone" name="phone" placeholder="Số điện thoại (10 số)" required pattern="0[0-9]{9}" />
-    </div>
+      <div class="input-group">
+        <input type="password" id="newPassword" name="password" placeholder="Mật khẩu" required />
+        <span class="toggle-password" onclick="togglePassword('newPassword')"></span>
+      </div>
 
-    <div class="input-group">
-      <input type="password" id="newPassword" name="password" placeholder="Mật khẩu" required />
-      <span class="toggle-password" onclick="togglePassword('newPassword')"></span>
-    </div>
+      <div class="input-group">
+        <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu" required />
+        <span class="toggle-password" onclick="togglePassword('confirmPassword')"></span>
+      </div>
 
-    <div class="input-group">
-      <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu" required />
-      <span class="toggle-password" onclick="togglePassword('confirmPassword')"></span>
-    </div>
+      <button id="submitBtn" type="submit">Đăng ký</button>
 
-    <!-- Google reCAPTCHA (nếu bạn muốn tắt khi dev thì bỏ <div> này) -->
-    <div class="input-group">
-      <div class="g-recaptcha" data-sitekey="6LeW6JIrAAAAAA00l7G0gTC1uT0b9BKuC2HcqAbA"></div>
-    </div>
+      <div class="extra-links">
+        <a href="login.html">Đã có tài khoản?</a>
+      </div>
+    </form>
 
-    <button id="submitBtn" type="submit">Đăng ký</button>
+    <p id="message" style="margin-top:10px;"></p>
+  </div>
 
-    <div class="extra-links">
-      <a href="login.html">Đã có tài khoản?</a>
-    </div>
-  </form>
-
-  <p id="message" style="margin-top:10px;"></p>
-</div>
-
-<script>
-  // Hiện/ẩn mật khẩu
-  function togglePassword(id) {
-    const input = document.getElementById(id);
-    if (!input) return;
-    input.type = input.type === "password" ? "text" : "password";
-  }
-
-  const form = document.getElementById("registerForm");
-  const msgEl = document.getElementById("message");
-  const submitBtn = document.getElementById("submitBtn");
-
-  // Helper hiển thị thông báo
-  function showMsg(text, color = "red") {
-    msgEl.textContent = text;
-    msgEl.style.color = color;
-  }
-
-  // Hàm validate email (chỉ cho @gmail.com)
-  function isGmail(email) {
-    return typeof email === "string" && email.toLowerCase().endsWith("@gmail.com");
-  }
-
-  // Xử lý submit
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    // Lấy giá trị
-    const username = document.getElementById("newUsername").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("newPassword").value;
-    const confirm = document.getElementById("confirmPassword").value;
-
-    // Reset thông báo
-    showMsg("");
-
-    // Validate client-side
-    if (!username) { showMsg("❗ Vui lòng nhập tên đăng nhập"); return; }
-    if (!isGmail(email)) { showMsg("❗ Chỉ hỗ trợ địa chỉ Gmail (@gmail.com)"); return; }
-    if (!/^0\d{9}$/.test(phone)) { showMsg("❗ Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0"); return; }
-    if (password.length < 6) { showMsg("🔒 Mật khẩu phải có ít nhất 6 ký tự"); return; }
-    if (password !== confirm) { showMsg("❗ Mật khẩu nhập lại không khớp!"); return; }
-
-    // Kiểm tra reCAPTCHA: nếu grecaptcha không tồn tại (dev env) thì cho phép tiếp để test.
-    let captchaResponse = "";
-    if (window.grecaptcha && typeof grecaptcha.getResponse === "function") {
-      captchaResponse = grecaptcha.getResponse();
-      if (!captchaResponse) { showMsg("🚫 Vui lòng xác minh bạn không phải robot!"); return; }
-    } else {
-      // Grecaptcha chưa load (ví dụ dev), không block nhưng log để bạn biết
-      console.warn("grecaptcha not found — continuing without captcha (dev mode).");
+  <script>
+    function togglePassword(id) {
+      const input = document.getElementById(id);
+      if (input) input.type = input.type === "password" ? "text" : "password";
     }
 
-    // Disable button để tránh gửi nhiều lần
-    submitBtn.disabled = true;
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = "Đang gửi...";
+    const form = document.getElementById("registerForm");
+    const msgEl = document.getElementById("message");
+    const submitBtn = document.getElementById("submitBtn");
 
-    try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username, email, phone, password, captcha: captchaResponse })
-      });
+    function showMsg(text, color = "red") {
+      msgEl.textContent = text;
+      msgEl.style.color = color;
+    }
 
-      const data = await res.json();
+    function isGmail(email) {
+      return typeof email === "string" && email.toLowerCase().endsWith("@gmail.com");
+    }
 
-      // Reset grecaptcha nếu có
-      if (window.grecaptcha && typeof grecaptcha.reset === "function") {
-        try { grecaptcha.reset(); } catch (err) { /* ignore */ }
-      }
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-      if (res.ok) {
-        showMsg("✅ " + (data.message || "Đăng ký thành công!"), "green");
+      const username = document.getElementById("newUsername").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const password = document.getElementById("newPassword").value;
+      const confirm = document.getElementById("confirmPassword").value;
 
-        // Lưu thông tin user nếu backend trả về user (giúp menu hiển thị)
-        if (data.user) {
-          try { localStorage.setItem("user", JSON.stringify(data.user)); } catch (e) { console.warn(e); }
-        } else {
-          // Nếu backend không trả user, lưu tối thiểu username/email
-          try { localStorage.setItem("user", JSON.stringify({ username, email })); } catch (e) { /* ignore */ }
-        }
+      showMsg("");
 
-        // Chuyển sang trang login hoặc menu tuỳ logic (ở đây sang menu)
-        setTimeout(() => {
-          if (typeof loadPage === "function") {
-            loadPage("menu.html");
-          } else {
-            // fallback: mở login page
+      if (!username) return showMsg("❗ Vui lòng nhập tên đăng nhập");
+      if (!isGmail(email)) return showMsg("❗ Chỉ hỗ trợ địa chỉ Gmail (@gmail.com)");
+      if (!/^0\d{9}$/.test(phone)) return showMsg("❗ Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0");
+      if (password.length < 6) return showMsg("🔒 Mật khẩu phải có ít nhất 6 ký tự");
+      if (password !== confirm) return showMsg("❗ Mật khẩu nhập lại không khớp!");
+
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = "Đang gửi...";
+
+      try {
+        const res = await fetch("https://test-app-f96w.onrender.com/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username, email, phone, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          showMsg("✅ " + (data.message || "Đăng ký thành công!"), "green");
+          localStorage.setItem("user", JSON.stringify(data.user || { username, email }));
+          setTimeout(() => {
             window.location.href = "/pages/login.html";
-          }
-        }, 900);
-      } else {
-        showMsg("⚠️ " + (data.message || "Lỗi khi đăng ký"), "red");
+          }, 1000);
+        } else {
+          showMsg("⚠️ " + (data.message || "Lỗi khi đăng ký"));
+        }
+      } catch (err) {
+        console.error(err);
+        showMsg("🚨 Lỗi máy chủ: " + (err.message || err));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
       }
-    } catch (err) {
-      console.error(err);
-      showMsg("🚨 Lỗi máy chủ: " + (err.message || err));
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-    }
-  });
-</script>
+    });
+  </script>
+</body>
+</html>
