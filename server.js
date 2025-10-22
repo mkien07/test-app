@@ -13,7 +13,7 @@ connectDB();
 // ✅ Cấu hình CORS cho domain frontend
 app.use(
   cors({
-    origin: ["http://localhost:5500", "https://test-app.onrender.com"],
+    origin: ["http://localhost:5500", "https://test-app-f96w.onrender.com"],
     credentials: true,
   })
 );
