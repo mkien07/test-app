@@ -27,6 +27,10 @@ router.post("/register", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+  console.log(req.body)
+  console.log(user)
+
+
 });
 
 // Đăng nhập
